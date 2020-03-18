@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjh.mapper.SelMapper">
+
+    <select id="selSpecies" resultType="CropsSpeciesInfo" >
+        select `name`,`database`,`image` from plantingspecies
+    </select>
+
+    <select id="selCrop" resultType="CropInfo" parameterType="String">
+        select `name`,`databaseData` from ${name}
+    </select>
+
+
+    <select id="selColumnName" resultType="String">
+        select
+            GROUP_CONCAT(tableName  ORDER BY id asc SEPARATOR ",")
+        from (
+              select
+                  COLUMN_NAME tableName,ordinal_position id
+              from
+                  information_schema.columns
+              where
+                  TABLE_SCHEMA = #{databaseName} and TABLE_NAME =#{tableName}
+              ORDER BY
+                  ordinal_position ) t
+    </select>
+
+    <select id="selCropData" resultType="String">
+        SELECT concat(${colName}) from ${tableName} limit ${pageNumber},1
+    </select>
+
+    <select id="selTotalPageCount" resultType="Integer">
+        select count(*) from ${databaseName}
+    </select>
+</mapper>
+
