@@ -5,15 +5,17 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bjh.mapper.SelMapper">
 
+    <!--查询种质种类 SpeciesInfo{name='粮食作物', database='GrainCrope', image='grain.jpg'}-->
     <select id="selSpecies" resultType="CropsSpeciesInfo" >
         select `name`,`database`,`image` from plantingspecies
     </select>
 
+    <!--查询某个种类信息-->
     <select id="selCrop" resultType="CropInfo" parameterType="String">
         select `name`,`databaseData` from ${name}
     </select>
 
-
+    <!--查询列名-->
     <select id="selColumnName" resultType="String">
         select
             GROUP_CONCAT(tableName  ORDER BY id asc SEPARATOR ",")
@@ -28,12 +30,29 @@
                   ordinal_position ) t
     </select>
 
+    <!--查询作物数据-->
     <select id="selCropData" resultType="String">
         SELECT concat(${colName}) from ${tableName} limit ${pageNumber},1
     </select>
 
+    <!--查询总共多少页数据-->
     <select id="selTotalPageCount" resultType="Integer">
         select count(*) from ${databaseName}
+    </select>
+
+    <!--查询筛选条件-->
+    <select id="selQueryCondition" resultType="String">
+        select `value` from ${crop}
+    </select>
+
+    <!--根据条件查询总页数-->
+    <select id="selQueryTotalPageCount" resultType="Integer">
+        select count(*) from $(tableName)  where  ${querySelector}
+    </select>
+
+    <!--根据条件查询数据-->
+    <select id="selQueryCropData" resultType="String">
+         select concat(${colName}) from ${tableName} WHERE ${querySelector} limit ${pageNumber},1
     </select>
 </mapper>
 

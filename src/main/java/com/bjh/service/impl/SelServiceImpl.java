@@ -9,14 +9,132 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Service
 public class SelServiceImpl implements SelService {
+
     @Resource
     SelMapper selMapper;
     @Resource
     ComboPooledDataSource dataSource;
+
+
+    /**
+     *返回查询页面的查询条件
+     * [PGB0001, 早金冠, ZAO JIN GUAN, 辽宁兴城, 中国农科院果树所, Rosaceae(蔷薇科), Malus(苹果属...
+     * @param crop
+     * @return
+     */
+    @Override
+    public String[] getCropQuery(String crop) {
+        //查询出来list
+        List<String> strings = selMapper.selQueryCondition(crop+"ku");
+        //封装成指定格式
+        int dex = 0;
+        String arr[] = new String[strings.size()];
+
+        for (String o : strings) {
+            arr[dex] = o;
+            dex++;
+        }
+
+        return arr;
+    }
+
+    /**
+     *
+     * @param str
+     * @return
+     */
+    @Override
+    public Map<String,String> getQueryCountAndData(Map<String,Object> str) {
+        /*输入
+        {
+           querySelect={属名=Malus(苹果属), 高程=<=240, 北纬=<3042, 生育期D=>=170, 生育期评价=[长, 中], 始果年龄=<>5},
+           crop=APPLE,
+           pageNumber=1
+         }
+         `属名`='Malus(苹果属)' and `高程`<=240 and `北纬`<3042 and `生育期D` >=170 and `生育期评价` in ('长','中') and `始果年龄`<>5
+         加工
+            {
+             `属名` : ='Malus(苹果属)',
+             `高程` : <=240,
+             `北纬` : <3042,
+             `生育期D` : >=170,
+             `生育期评价` : in ('长','中'),
+             `始果年龄` : <>5
+             }
+         */
+            //获取
+            Map<String,Object> querySelect = (Map)str.get("querySelect");
+            //返回值是处理好的map集合
+            Map<String,String> map = new HashMap<>();
+            for(String key : querySelect.keySet()){
+
+                String value = querySelect.get(key).toString();
+                if(value.contains(">") || value.contains("<") || value.contains("=")){
+                    //是   "高程  <=240"    =>  " `高程`  <=240"
+
+                    String innerKey = "`"+key+"`";
+                    String innerValue = value;
+                    map.put(innerKey,innerValue);
+                }else if(value.contains(",")){
+                    //是  "生育期评价  [长, 中]"  =>  "`生育期评价`  in ('长','中')"
+
+                    String innerKey = "`"+key+"`";
+                    System.out.println(value);
+                    String replace = value.replace("[", "");
+                    String replace1 = replace.replace("]", "");
+                    System.out.println(replace1);
+                    String[] split = replace1.split(",");
+
+
+                    String innerValue = "in (" ;
+                    int count = 0;
+                    for (String s : split) {
+                        s = s.trim();
+                        if(count==0){
+                            innerValue= innerValue+"'"+s+"'";
+                        }else{
+                            innerValue= innerValue+",'"+s+"'";
+                        }
+                        count++;
+                    }
+
+                    innerValue= innerValue+")";
+
+                    map.put(innerKey,innerValue);
+                }else{
+
+                    Pattern reg = Pattern.compile("[0-9]*");
+
+                    Matcher matcher = reg.matcher(value);
+                    if(matcher.matches()){
+                        //是数字的话  属名   123  =>   `属名`  =123
+                        String innerKey = "`"+key+"`";
+                        String innerValue = "="+value;
+                        map.put(innerKey,innerValue);
+                    }else{
+                        //不是数字  属名   Malus(苹果属)  =>   `属名`  ='Malus(苹果属)'
+                        String innerKey = "`"+key+"`";
+                        value = value.trim();
+                        String innerValue = "='"+value+"'";
+                        map.put(innerKey,innerValue);
+                    }
+                }
+            }
+
+        System.out.println(map.toString());
+
+
+        return null;
+    }
+
+
+
     /**
      * 返回种类列表
      * @param
@@ -94,7 +212,7 @@ public class SelServiceImpl implements SelService {
             result.add(s);
         }
 
-        System.out.println(result.toString());
+
         return result;
     }
 
@@ -117,9 +235,9 @@ public class SelServiceImpl implements SelService {
     }
     /**
      * !!工具类
-     *
+     *  输入jdbc:mysql://localhost:3306/crops?useSSL=false&serverTimezone=UTC
      * @param s
-     * @return 数据库名
+     * @return 数据库名 crops
      */
     private String getDatabaseName(String s){
         //jdbc:mysql://localhost:3306/crops?useSSL=false&serverTimezone=UTC

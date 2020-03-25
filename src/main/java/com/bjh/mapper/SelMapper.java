@@ -23,4 +23,13 @@ public interface SelMapper {
 
     //查询总共多少页数据
     Integer selTotalPageCount(@Param("databaseName")String databaseName);
+
+    //查询筛选条件
+    List<String> selQueryCondition(@Param("crop")String crop);
+
+    //根据条件查询总页数
+    Integer selQueryTotalPageCount(Map<String,String> map);
+
+    //根据条件查询数据
+    String selQueryCropData(Map<String,String> map);
 }

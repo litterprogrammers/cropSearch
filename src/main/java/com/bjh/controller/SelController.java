@@ -1,34 +1,44 @@
 package com.bjh.controller;
 
 import com.bjh.service.SelService;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
 public class SelController {
     @Resource
     private SelService selServiceImpl;
 
-    @ResponseBody
+
     @RequestMapping(value = "/allCropList")
     public List allCropList(){
+
         return selServiceImpl.getAllCropList();
     }
-    @ResponseBody
+
     @RequestMapping(value = "/cropNameList")
     public List CropNameList(@RequestParam() String crop){
         return selServiceImpl.getCropNameList(crop);
     }
-    @ResponseBody
+
     @RequestMapping(value = "/cropList")
     public List CropList(@RequestParam() String crop, @RequestParam() int pageNumber){
         return selServiceImpl.getCropList(crop,pageNumber);
     }
 
+    @RequestMapping(value = "/cropQueryCondition")
+    public String[] CropQuery(@RequestParam() String crop){
+        return selServiceImpl.getCropQuery(crop);
+    }
+    @RequestMapping(value = "/cropQuery",method = RequestMethod.POST)
+    public Map<String,String> CropList(@RequestBody(required = false) Map<String, Object> data){
+        System.out.println(data.toString());
+        return selServiceImpl.getQueryCountAndData(data);
+
+    }
 
 }
