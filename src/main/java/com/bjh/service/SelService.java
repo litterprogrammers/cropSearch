@@ -18,5 +18,5 @@ public interface SelService {
     String[] getCropQuery(String crop);
 
     //返回条件查询的页总数和数据
-    Map<String,String> getQueryCountAndData(Map<String,Object> str);
+    Map<String,Object> getQueryCountAndData(Map<String,Object> str);
 }

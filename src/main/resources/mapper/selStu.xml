@@ -47,12 +47,27 @@
 
     <!--根据条件查询总页数-->
     <select id="selQueryTotalPageCount" resultType="Integer">
-        select count(*) from $(tableName)  where  ${querySelector}
+        select count(*) from ${tableName}
+        <where>
+            <foreach collection="querySelector.keys" index="index" item="key">
+                and  ${key}${querySelector[key]}
+            </foreach>
+        </where>
     </select>
 
     <!--根据条件查询数据-->
     <select id="selQueryCropData" resultType="String">
-         select concat(${colName}) from ${tableName} WHERE ${querySelector} limit ${pageNumber},1
+         select concat(${colName}) from ${tableName}
+
+         <where>
+             <foreach collection="querySelector.keys" index="index" item="key">
+                 and  ${key}${querySelector[key]}
+             </foreach>
+         </where>
+
+
+        limit ${pageNumber},1
     </select>
 </mapper>
 
+        <!--'querySelector[key]'-->

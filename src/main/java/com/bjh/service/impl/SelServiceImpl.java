@@ -1,6 +1,7 @@
-package com.bjh.service.impl;
 
+package com.bjh.service.impl;
 import com.bjh.mapper.SelMapper;
+import com.bjh.pojo.QueryCropData;
 import com.bjh.service.SelService;
 import com.bjh.pojo.CropInfo;
 import com.bjh.pojo.CropsSpeciesInfo;
@@ -50,7 +51,7 @@ public class SelServiceImpl implements SelService {
      * @return
      */
     @Override
-    public Map<String,String> getQueryCountAndData(Map<String,Object> str) {
+    public Map<String,Object> getQueryCountAndData(Map<String,Object> str) {
         /*输入
         {
            querySelect={属名=Malus(苹果属), 高程=<=240, 北纬=<3042, 生育期D=>=170, 生育期评价=[长, 中], 始果年龄=<>5},
@@ -68,11 +69,28 @@ public class SelServiceImpl implements SelService {
              `始果年龄` : <>5
              }
          */
-            //获取
+            //
             Map<String,Object> querySelect = (Map)str.get("querySelect");
+
+
+
+
+
+
             //返回值是处理好的map集合
-            Map<String,String> map = new HashMap<>();
-            for(String key : querySelect.keySet()){
+            Map<String,Object> map = new HashMap<>();
+            //三大天王
+            String tableName = (String)str.get("crop");
+
+            String column = getColumnName(tableName);
+            column = ChangFormat(column);
+            Integer pageNumber =(Integer) str.get("pageNumber");
+
+
+
+
+
+        for(String key : querySelect.keySet()){
 
                 String value = querySelect.get(key).toString();
                 if(value.contains(">") || value.contains("<") || value.contains("=")){
@@ -85,10 +103,11 @@ public class SelServiceImpl implements SelService {
                     //是  "生育期评价  [长, 中]"  =>  "`生育期评价`  in ('长','中')"
 
                     String innerKey = "`"+key+"`";
-                    System.out.println(value);
+
                     String replace = value.replace("[", "");
                     String replace1 = replace.replace("]", "");
-                    System.out.println(replace1);
+
+
                     String[] split = replace1.split(",");
 
 
@@ -127,10 +146,21 @@ public class SelServiceImpl implements SelService {
                 }
             }
 
-        System.out.println(map.toString());
+        QueryCropData queryCropData = new QueryCropData(map, tableName, column, pageNumber);
+        System.out.println(queryCropData);
+        //到数据库获取值列
+        String s[] = selMapper.selQueryCropData(queryCropData).split(",");
+        Integer count =  selMapper.selQueryTotalPageCount(queryCropData);
+        HashMap<String, Object> returnHashMap = new HashMap<>();
 
 
-        return null;
+        returnHashMap.put("data",s);
+        returnHashMap.put("count",count);
+
+
+
+
+        return returnHashMap;
     }
 
 
@@ -217,6 +247,7 @@ public class SelServiceImpl implements SelService {
     }
 
     /**
+     * !工具类
      * 返回列名
      * @param cropName
      * @return

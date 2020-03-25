@@ -35,8 +35,7 @@ public class SelController {
         return selServiceImpl.getCropQuery(crop);
     }
     @RequestMapping(value = "/cropQuery",method = RequestMethod.POST)
-    public Map<String,String> CropList(@RequestBody(required = false) Map<String, Object> data){
-        System.out.println(data.toString());
+    public Map<String,Object> CropList(@RequestBody(required = false) Map<String, Object> data){
         return selServiceImpl.getQueryCountAndData(data);
 
     }
