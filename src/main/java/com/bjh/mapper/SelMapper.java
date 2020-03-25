@@ -2,6 +2,7 @@ package com.bjh.mapper;
 
 import com.bjh.pojo.CropInfo;
 import com.bjh.pojo.CropsSpeciesInfo;
+import com.bjh.pojo.QueryCropData;
 import org.apache.ibatis.annotations.Param;
 
 
@@ -28,8 +29,8 @@ public interface SelMapper {
     List<String> selQueryCondition(@Param("crop")String crop);
 
     //根据条件查询总页数
-    Integer selQueryTotalPageCount(Map<String,String> map);
+    Integer selQueryTotalPageCount(QueryCropData map);
 
     //根据条件查询数据
-    String selQueryCropData(Map<String,String> map);
+    String selQueryCropData(QueryCropData map);
 }
